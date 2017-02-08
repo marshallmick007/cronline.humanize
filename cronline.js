@@ -11,16 +11,23 @@ Cronline.humanize = function(cronline){
     var string = '';
 
     if(fields.length != 5){
-      string = 'invalid cronline';
+      return 'invalid cronline';
     } else {
-      string = 'At ' + this.parseField('minute', fields[0]) + '|';
-      string += (fields[1] == '*') ? '' : this.parseField('hour', fields[1]) + '|';
-      string += (fields[2] == '*') ? '' : this.parseField('day', fields[2]) + '|';
-      string += (fields[3] == '*') ? '' : this.parseField('month', fields[3]) + '|';
-      string += (fields[4] == '*') ? '' : this.parseField('weekday', fields[4]) + '|';
-    }
+      parts = {};
 
-    return string;
+      parts.minute = this.parseField('minute', fields[0]);
+      parts.hour = (fields[1] == '*') ? '' : this.parseField('hour', fields[1]);
+      parts.day = (fields[2] == '*') ? '' : this.parseField('day', fields[2]);
+      parts.month = (fields[3] == '*') ? ' of every month ' : this.parseField('month', fields[3]);
+      parts.weekday = (fields[4] == '*') ? '' : this.parseField('weekday', fields[4]);
+
+      // if(typeof parseInt(parts.minute) == 'number' && typeof parts.hour == 'number'){
+      minutes = "" + parts.minute;
+        string = 'At ' + fields[1] + ':' + "00".substring(0, 2 - minutes.length) + minutes;
+      // }
+
+      return string + parts.day + parts.month + parts.weekday;
+    }
   }
 };
 
@@ -29,7 +36,8 @@ Cronline.parseField = function(name, value){
 
   // *
   if(value == '*' || value.match(/^\*\/1$/)){
-    output = 'every ';
+    output = 'every ' + name;
+    return output;
   }
   // 15 OR 1,2,3,4,5
   if(value.match(/^[0-9]{1,2}$/) || value.match(/^[0-9,]+[0-9]$/)){
@@ -56,14 +64,36 @@ Cronline.parseField = function(name, value){
 Cronline.decorate = function(name, parsed_value){
   switch (name){
     case 'minute':
-      return 'minute' + parsed_value;
+      return parsed_value;
     case 'hour':
-      return 'hour ' + parsed_value;
+      return parsed_value;
     case 'day':
-      return parsed_value;
+      return ' on day-of-month ' + parsed_value;
     case 'month':
-      return parsed_value;
+      return ' in ' + this.monthNames(parsed_value);
     case 'weekday':
-      return parsed_value;
+      return ' and on ' + this.dayNames(parsed_value);
   }
+};
+// TODO Missing 1-3 -> range ----------
+Cronline.monthNames = function(value){
+  var monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  var months = value.split(',');
+  var names = [];
+  months.forEach(function(m) {
+    names.push(monthNames[m]);
+  });
+
+  return names.join(', ');
+};
+
+Cronline.dayNames = function(value){
+  var dayNames = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  var days = value.split(',');
+  var names = [];
+  days.forEach(function(m) {
+    names.push(dayNames[m]);
+  });
+
+  return names.join(', ');
 };

@@ -1,0 +1,20 @@
+<html>
+<head>
+    <script src="./jquery.js"></script>
+    <script src="./cronline.js"></script>
+</head>
+<body>
+    <label for="cron">Cron:</label>
+    <input id="cron" type="text"/>
+    <p id="result">
+        -----
+    </p>
+    <script type="application/javascript">
+        $("#cron").on("blur", function(e){
+          var text = Cronline.humanize($("#cron").val());
+          console.log(text);
+          $("#result").text(text);
+        });
+    </script>
+</body>
+</html>
