@@ -1,7 +1,6 @@
 var _ = require('lodash');
 
 module.exports = {
-  time: null,
 
   humanize: function(cronline){
     if(cronline == '* * * * *'){
@@ -38,8 +37,42 @@ module.exports = {
             o = defined_fields[i];
             combination[o[0]] = o[1];
           }
-          this.parseTime(combination);
-          return 'at ' + this.time;
+          if(_.has(combination, 'minute') && _.has(combination, 'hour'))
+          {
+            return 'at ' + this.parseTime(combination);
+          }
+          else if(_.has(combination, 'minute') && _.has(combination, 'weekday'))
+          {
+            return 'at minute ' + combination.minute + ' on ' + this.dayName(combination.weekday);
+          }
+          else if(_.has(combination, 'minute') && _.has(combination, 'month'))
+          {
+            return 'at minute ' + combination.minute + ' in ' + this.monthName(combination.month);
+          }
+          else if(_.has(combination, 'minute') && _.has(combination, 'day'))
+          {
+            return 'at minute ' + combination.minute + ' on day of month ' + combination.day;
+          }
+          else if(_.has(combination, 'hour') && _.has(combination, 'day'))
+          {
+            return 'at every minute past hour ' + combination.hour + ' on day of month ' + combination.day;
+          }
+          else if(_.has(combination, 'hour') && _.has(combination, 'month'))
+          {
+            return 'at every minute past hour ' + combination.hour + ' in ' + this.monthName(combination.month);
+          }
+          else if(_.has(combination, 'hour') && _.has(combination, 'weekday'))
+          {
+            return 'at every minute past hour ' + combination.hour + ' on ' + this.dayName(combination.weekday);
+          }
+          else if(_.has(combination, 'day') && _.has(combination, 'month'))
+          {
+            return 'at every minute on day of month ' + combination.day + ' in ' + this.monthName(combination.month);
+          }
+          else if(_.has(combination, 'month') && _.has(combination, 'weekday'))
+          {
+            return 'at every minute on ' + this.dayName(combination.weekday) + ' in ' + this.monthName(combination.month);
+          }
         }
       }
     }
@@ -48,7 +81,7 @@ module.exports = {
     var out = '';
     switch(value[0]){
       case 'minute':
-        out = 'on minute ' + value[1];
+        out = 'at minute ' + value[1];
         break;
       case 'hour':
          out = 'at every minute of hour ' + value[1];
@@ -71,10 +104,7 @@ module.exports = {
 
 
   parseTime: function(combination){
-    if(_.has(combination, 'minute') && _.has(combination, 'hour'))
-    {
-      this.time = combination.hour + ':' + "00".substring(0, 2 - combination.minute.length) + combination.minute;
-    }
+    return combination.hour + ':' + "00".substring(0, 2 - combination.minute.length) + combination.minute;
   },
   parseField: function(value){
     var output = '';
