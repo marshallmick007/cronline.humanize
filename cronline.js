@@ -134,7 +134,6 @@ module.exports = {
       string = 'at every minute past hour ' + combination.hour;
     }
     else if (this.hasMinutesAndHours(combination)) {
-      console.log(combination.minute);
       string = 'at minute ' + this.listify(combination.minute);
       string += ' past hour ' + this.listify(combination.hour);
     }
@@ -200,7 +199,6 @@ module.exports = {
     return output;
   },
   monthName: function(value){
-// TODO Missing 1-3 -> range ----------
     var monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var months = value.split(',');
     var names = [];
