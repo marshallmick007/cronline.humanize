@@ -27,7 +27,11 @@ module.exports = {
         if(defined_fields.length == 1)
         {
           o = defined_fields[0];
-          return this.simple(o);
+          if(o[1].match(','))
+          {
+            return this.list(o);
+          }
+          return this.single(o);
         }
         else
         {
@@ -36,7 +40,7 @@ module.exports = {
       }
     }
   },
-  simple: function(value){
+  single: function(value){
     var out = '';
     switch(value[0]){
       case 'minute':
@@ -60,14 +64,53 @@ module.exports = {
 
     return out;
   },
+  list: function(value){
+    var out = '';
+
+    switch(value[0]){
+      case 'minute':
+        out = 'at minute ' + this.listify(value[1]);
+        break;
+      case 'hour':
+        out = 'at every minute of hour ' + this.listify(value[1]);
+        break;
+      case 'day':
+        out = 'at every minute on day of the month ' + this.listify(value[1]);
+        break;
+      case 'month':
+        self = this;
+        var months = _.map(value[1].split(','), function(v){
+          return self.monthName(v);
+        });
+        out = 'at every minute in ' + this.listify(months.join(','));
+        break;
+      case 'weekday':
+        self = this;
+        var weekdays = _.map(value[1].split(','), function(v){
+          return self.dayName(v);
+        });
+        out = 'at every minute on ' + this.listify(weekdays.join(','));
+        break;
+      default:
+        break;
+    }
+
+    return out;
+  },
   hasMinutes: function (combination) {
     return _.has(combination, 'minute') && !_.has(combination, 'hour');
   },
   hasHours: function (combination) {
     return !_.has(combination, 'minute') && _.has(combination, 'hour');
   },
-  hasTime: function (combination) {
+  hasMinutesAndHours: function (combination) {
     return _.has(combination, 'minute') && _.has(combination, 'hour');
+  },
+  hasTime: function (combination) {
+    if(_.has(combination, 'minute') && _.has(combination, 'hour')) {
+      return (!combination.minute.match(',') && !combination.hour.match(','));
+    }
+    return false;
   },
   hasDayOfTheMonth: function (combination) {
     return _.has(combination, 'day');
@@ -82,16 +125,22 @@ module.exports = {
     var string = '';
 
     if (this.hasTime(combination)) {
-      string += 'at ' + this.parseTime(combination);
+      string = 'at ' + this.parseTime(combination);
     }
     else if (this.hasMinutes(combination)) {
-      string += 'at minute ' + combination.minute;
+      string = 'at minute ' + combination.minute;
     }
     else if (this.hasHours(combination)) {
-      string += 'at every minute past hour ' + combination.hour;
+      string = 'at every minute past hour ' + combination.hour;
     }
-    else {
-      string += 'at every minute'
+    else if (this.hasMinutesAndHours(combination)) {
+      console.log(combination.minute);
+      string = 'at minute ' + this.listify(combination.minute);
+      string += ' past hour ' + this.listify(combination.hour);
+    }
+    else
+    {
+      string = 'at every minute';
     }
     return string;
   },
@@ -170,5 +219,8 @@ module.exports = {
     });
 
     return names.join(', ');
+  },
+  listify: function(value) {
+    return value.replace(/,(?=[^,]+$)/, ' and ');
   }
 };
