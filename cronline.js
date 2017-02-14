@@ -14,11 +14,11 @@ module.exports = {
       } else {
         var parsed_field = [];
 
-        parsed_field.push(['minute', this.parseField(fields[0])]);
-        parsed_field.push(['hour', this.parseField(fields[1])]);
-        parsed_field.push(['day', this.parseField(fields[2])]);
-        parsed_field.push(['month', this.parseField(fields[3])]);
-        parsed_field.push(['weekday', this.parseField(fields[4])]);
+        parsed_field.push(['minute', this.getValue(fields[0])]);
+        parsed_field.push(['hour', this.getValue(fields[1])]);
+        parsed_field.push(['day', this.getValue(fields[2])]);
+        parsed_field.push(['month', this.getValue(fields[3])]);
+        parsed_field.push(['weekday', this.getValue(fields[4])]);
 
         var defined_fields = _.filter(parsed_field, function (o) {
           return o[1] !== null;
@@ -30,6 +30,10 @@ module.exports = {
           if(o[1].match(','))
           {
             return this.list(o);
+          }
+          else if(o[1].match('-'))
+          {
+            return this.range(o);
           }
           return this.single(o);
         }
@@ -90,6 +94,39 @@ module.exports = {
           return self.dayName(v);
         });
         out = 'at every minute on ' + this.listify(weekdays.join(','));
+        break;
+      default:
+        break;
+    }
+
+    return out;
+  },
+  range: function(value){
+    var out = '';
+
+    switch(value[0]){
+      case 'minute':
+        out = 'at every minute ' + this.rangeify(value[1]);
+        break;
+      case 'hour':
+        out = 'at every minute past every hour ' + this.rangeify(value[1]);
+        break;
+      case 'day':
+        out = 'at every minute on every day of the month ' + this.rangeify(value[1]);
+        break;
+      case 'month':
+        self = this;
+        var months = _.map(value[1].split('-'), function(v){
+          return self.monthName(v);
+        });
+        out = 'at every minute of every month ' + this.rangeify(months.join('-'));
+        break;
+      case 'weekday':
+        self = this;
+        var weekdays = _.map(value[1].split('-'), function(v){
+          return self.dayName(v);
+        });
+        out = 'at every minute of every day ' + this.rangeify(weekdays.join('-'));
         break;
       default:
         break;
@@ -170,33 +207,8 @@ module.exports = {
   parseTime: function(combination){
     return combination.hour + ':' + "00".substring(0, 2 - combination.minute.length) + combination.minute;
   },
-  parseField: function(value){
-    var output = '';
-
-    // *
-    if(value == '*' || value.match(/^\*\/1$/)){
-      return null;
-    }
-    // 15 OR 1,2,3,4,5
-    if(value.match(/^[0-9]{1,2}$/) || value.match(/^[0-9,]+[0-9]$/)){
-      output = value;
-    }
-    // */5
-    if(value.match(/^\*\/[0-9]{1,2}$/)){
-      output = 'every ' + value.replace(/\*\//, '');
-    }
-    // 5-25
-    if(value.match(/^[0-9]{1,2}-[0-9]{1,2}$/)){
-      var range = value.match(/^([0-9]{1,2})-([0-9]{1,2})$/);
-      output = ' from ' + range[1] + ' to ' + range[2];
-    }
-    // 5-25/5
-    if(value.match(/^[0-9]{1,2}-[0-9]{1,2}\/[0-9]{1,2}$/)){
-      var range = value.match(/^([0-9]{1,2})-([0-9]{1,2})\/([0-9]{1,2})$/);
-      output = range[3] + ' from ' + range[1] + ' to ' + range[2];
-    }
-
-    return output;
+  getValue: function(value){
+    return (value == '*' || value.match(/^\*\/1$/)) ? null: value;
   },
   monthName: function(value){
     var monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -220,5 +232,8 @@ module.exports = {
   },
   listify: function(value) {
     return value.replace(/,(?=[^,]+$)/, ' and ');
+  },
+  rangeify: function(value){
+    return value.replace(/([\w]+)-([\w]+)/, 'from $1 to $2')
   }
 };
