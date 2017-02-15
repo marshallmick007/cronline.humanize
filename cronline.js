@@ -79,7 +79,7 @@ module.exports = {
         out = 'at every minute of hour ' + this.listify(value[1]);
         break;
       case 'day':
-        out = 'at every minute on day of the month ' + this.listify(value[1]);
+        out = 'at every minute on days of the month ' + this.listify(value[1]);
         break;
       case 'month':
         self = this;
@@ -190,19 +190,59 @@ module.exports = {
     out.push(this.humanizeTime(combination));
 
     if (this.hasDayOfTheMonth(combination)){
-      out.push('on day of the month ' + combination.day);
+      out.push('on day of the month ' + this.something(combination.day));
       if(this.hasWeekday(combination)) {
         out.push('and on ' + this.dayName(combination.weekday));
       }
     }
     else if(this.hasWeekday(combination)){
-      out.push('on ' + this.dayName(combination.weekday));
+      self = this;
+      var weekdays = _.map(combination.weekday.split('-'), function(v){
+        return self.dayName(v);
+      });
+
+      if(weekdays.length == 1)
+      {
+        var prefix = 'on ';
+      }
+      else
+      {
+        var prefix = 'on every day ';
+      }
+      out.push(prefix + this.something(weekdays.join('-')));
     }
     if(this.hasMonth(combination)){
-      out.push('in ' + this.monthName(combination.month))
+      self = this;
+      var months = _.map(combination.month.split('-'), function(v){
+        return self.monthName(v);
+      });
+
+      if(months.length == 1)
+      {
+        var prefix = 'in ';
+      }
+      else
+      {
+        var prefix = 'in every month ';
+      }
+      out.push(prefix + this.something(months.join('-')));
     }
 
     return out.join(' ');
+  },
+  something: function(o){
+    if(o.match(','))
+    {
+      return this.listify(o);
+    }
+    else if(o.match('-'))
+    {
+      return this.rangeify(o);
+    }
+    else
+    {
+      return o;
+    }
   },
   parseTime: function(combination){
     return combination.hour + ':' + "00".substring(0, 2 - combination.minute.length) + combination.minute;

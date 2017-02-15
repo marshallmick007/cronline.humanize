@@ -156,5 +156,30 @@ describe('combinations', function() {
       var result = Cronline.humanize('15 21 5 1 4');
       expect(result).to.equal('at 21:15 on day of the month 5 and on Thursday in January');
     });
+
+    it("should parse time and a list of days of month", function(){
+      var result = Cronline.humanize('30 12 1,10,20 * *');
+      expect(result).to.equal('at 12:30 on day of the month 1,10 and 20')
+    });
+
+    it("should parse time a range of days of month", function(){
+      var result = Cronline.humanize('0 6 15-25 * *');
+      expect(result).to.equal('at 6:00 on day of the month from 15 to 25')
+    });
+
+    it("should parse time a range of months", function(){
+      var result = Cronline.humanize('0 8 * 1-6 *');
+      expect(result).to.equal('at 8:00 in every month from January to June')
+    });
+
+    it("should parse time a range of days", function(){
+      var result = Cronline.humanize('30 9 * * 1-3');
+      expect(result).to.equal('at 9:30 on every day from Monday to Wednesday')
+    });
+
+    it("should parse anything", function(){
+      var result = Cronline.humanize('0 0,12 1 2 *');
+      expect(result).to.equal('at minute 0 past hour 0 and 12 on day of the month 1 in February');
+    })
   });
 });
