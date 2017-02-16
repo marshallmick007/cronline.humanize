@@ -3,7 +3,7 @@ var _ = require('lodash');
 module.exports = {
 
   humanize: function(cronline){
-    if(cronline == '* * * * *'){
+    if(cronline == '* * * * *' || cronline == '*/1 * * * *'){
       return 'at every minute';
     }
     else{
@@ -34,6 +34,10 @@ module.exports = {
           else if(o[1].match('-'))
           {
             return this.range(o);
+          }
+          else if(o[1].match('/'))
+          {
+            return this.step(o);
           }
           return this.single(o);
         }
@@ -127,6 +131,31 @@ module.exports = {
           return self.dayName(v);
         });
         out = 'at every minute of every day ' + this.rangeify(weekdays.join('-'));
+        break;
+      default:
+        break;
+    }
+
+    return out;
+  },
+  step: function(value){
+    var out = '';
+
+    switch(value[0]){
+      case 'minute':
+        out = 'at every ' + this.stepify(value[1]) + ' minute';
+        break;
+      case 'hour':
+        out = 'at every minute past every ' + this.stepify(value[1]) + ' hour';
+        break;
+      case 'day':
+        out = 'at every minute on every ' + this.stepify(value[1]) + ' day of the month';
+        break;
+      case 'month':
+        out = 'at every minute in every ' + this.stepify(value[1]) + ' month';
+        break;
+      case 'weekday':
+        out = 'at every minute on every ' + this.stepify(value[1]) + ' day of the week';
         break;
       default:
         break;
@@ -275,5 +304,22 @@ module.exports = {
   },
   rangeify: function(value){
     return value.replace(/([\w]+)-([\w]+)/, 'from $1 to $2')
+  },
+  stepify: function(value){
+    var step = value.replace(/\*\/([\d+])/, '$1');
+    return this.ordinalify(step);
+  },
+  ordinalify: function(value){
+      var j = value % 10, k = value % 100;
+      if (j == 1 && k != 11) {
+        return value + "st";
+      }
+      if (j == 2 && k != 12) {
+        return value + "nd";
+      }
+      if (j == 3 && k != 13) {
+        return value + "rd";
+      }
+      return value + "th";
   }
 };

@@ -91,6 +91,58 @@ describe('single expression', function(){
       expect(result).to.equal('at every minute of every day from Monday to Friday');
     });
   });
+
+  describe('step values expression', function() {
+    it('should parse a step of one minute', function () {
+      var result = Cronline.humanize("*/1 * * * *");
+      expect(result).to.equal('at every minute');
+    });
+
+    it('should parse a step of one hour', function () {
+      var result = Cronline.humanize("* */1 * * *");
+      expect(result).to.equal('at every minute');
+    });
+
+    it('should parse a step of one day of the month', function () {
+      var result = Cronline.humanize("* * */1 * *");
+      expect(result).to.equal('at every minute');
+    });
+
+    it('should parse a step of one month', function () {
+      var result = Cronline.humanize("* * * */1 *");
+      expect(result).to.equal('at every minute');
+    });
+
+    it('should parse a step of one weekday', function () {
+      var result = Cronline.humanize("* * * * */1");
+      expect(result).to.equal('at every minute');
+    });
+
+    it('should parse a step of minutes', function () {
+      var result = Cronline.humanize("*/5 * * * *");
+      expect(result).to.equal('at every 5th minute');
+    });
+
+    it('should parse a step of hours', function () {
+      var result = Cronline.humanize("* */3 * * *");
+      expect(result).to.equal('at every minute past every 3rd hour');
+    });
+
+    it('should parse a step of days of the month', function () {
+      var result = Cronline.humanize("* * */7 * *");
+      expect(result).to.equal('at every minute on every 7th day of the month');
+    });
+
+    it('should parse a step of month', function () {
+      var result = Cronline.humanize("* * * */3 *");
+      expect(result).to.equal('at every minute in every 3rd month');
+    });
+
+    it('should parse a step of weekdays', function () {
+      var result = Cronline.humanize("* * * * */2");
+      expect(result).to.equal('at every minute on every 2nd day of the week');
+    });
+  });
 });
 
 describe('combinations', function() {
