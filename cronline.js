@@ -39,7 +39,10 @@ module.exports = {
           {
             return this.step(o);
           }
-          return this.single(o);
+          else
+          {
+            return this.single(o);
+          }
         }
         else
         {
@@ -174,7 +177,7 @@ module.exports = {
   },
   hasTime: function (combination) {
     if(_.has(combination, 'minute') && _.has(combination, 'hour')) {
-      return (!combination.minute.match(',') && !combination.hour.match(','));
+      return (combination.minute.match(/^[0-9]{1,2}$/) && combination.hour.match(/^[0-9]{1,2}$/));
     }
     return false;
   },
@@ -194,14 +197,28 @@ module.exports = {
       string = 'at ' + this.parseTime(combination);
     }
     else if (this.hasMinutes(combination)) {
-      string = 'at minute ' + combination.minute;
+      string = 'at minute ' + this.something(combination.minute);
     }
     else if (this.hasHours(combination)) {
       string = 'at every minute past hour ' + combination.hour;
     }
     else if (this.hasMinutesAndHours(combination)) {
-      string = 'at minute ' + this.listify(combination.minute);
-      string += ' past hour ' + this.listify(combination.hour);
+      if(combination.minute.match('/'))
+      {
+        string = 'at every ' + this.something(combination.minute) + ' minute';
+      }
+      else
+      {
+        string = 'at minute ' + this.something(combination.minute);
+      }
+      if (combination.hour.match('/'))
+      {
+        string += ' on every ' + this.something(combination.hour) + ' hour';
+      }
+      else
+      {
+        string += ' past hour ' + this.something(combination.hour);
+      }
     }
     else
     {
@@ -267,6 +284,10 @@ module.exports = {
     else if(o.match('-'))
     {
       return this.rangeify(o);
+    }
+    else if(o.match('/'))
+    {
+      return this.stepify(o);
     }
     else
     {

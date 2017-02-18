@@ -229,9 +229,14 @@ describe('combinations', function() {
       expect(result).to.equal('at 9:30 on every day from Monday to Wednesday')
     });
 
+    it("should step of minutes and list of hours anything", function(){
+      var result = Cronline.humanize('*/5 0,12 1 2 *');
+      expect(result).to.equal('at every 5th minute past hour 0 and 12 on day of the month 1 in February');
+    });
+
     it("should parse anything", function(){
-      var result = Cronline.humanize('0 0,12 1 2 *');
-      expect(result).to.equal('at minute 0 past hour 0 and 12 on day of the month 1 in February');
-    })
+      var result = Cronline.humanize('*/11 */4 1,4 2-6 1,3,5');
+      expect(result).to.equal('at every 11th minute on every 4th hour on day of the month 1 and 4 and on Monday, Wednesday, Friday in every month from February to June');
+    });
   });
 });
