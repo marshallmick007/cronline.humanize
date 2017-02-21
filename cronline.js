@@ -33,6 +33,7 @@ module.exports = {
   },
   humanizeExp: function (value) {
     var out = '';
+
     switch (value[0]) {
       case 'minute':
         out = 'at minute ' + value[1];
@@ -60,27 +61,25 @@ module.exports = {
 
     switch (value[0]) {
       case 'minute':
-        out = 'at minute ' + this.listify(value[1]);
+        out = 'at minute ' + this.listifyExp(value[1]);
         break;
       case 'hour':
-        out = 'at every minute of hour ' + this.listify(value[1]);
+        out = 'at every minute of hour ' + this.listifyExp(value[1]);
         break;
       case 'day':
-        out = 'at every minute on days of the month ' + this.listify(value[1]);
+        out = 'at every minute on days of the month ' + this.listifyExp(value[1]);
         break;
       case 'month':
-        self = this;
         var months = value[1].split(',').map(function (v) {
-          return self.monthName(v);
-        });
-        out = 'at every minute in ' + this.listify(months.join(','));
+          return this.monthName(v);
+        }, this);
+        out = 'at every minute in ' + this.listifyExp(months.join(','));
         break;
       case 'weekday':
-        self = this;
         var weekdays = value[1].split(',').map(function (v) {
-          return self.dayName(v);
-        });
-        out = 'at every minute on ' + this.listify(weekdays.join(','));
+          return this.dayName(v);
+        }, this);
+        out = 'at every minute on ' + this.listifyExp(weekdays.join(','));
         break;
       default:
         break;
@@ -93,27 +92,25 @@ module.exports = {
 
     switch (value[0]) {
       case 'minute':
-        out = 'at every minute ' + this.rangeify(value[1]);
+        out = 'at every minute ' + this.rangeifyExp(value[1]);
         break;
       case 'hour':
-        out = 'at every minute past every hour ' + this.rangeify(value[1]);
+        out = 'at every minute past every hour ' + this.rangeifyExp(value[1]);
         break;
       case 'day':
-        out = 'at every minute on every day of the month ' + this.rangeify(value[1]);
+        out = 'at every minute on every day of the month ' + this.rangeifyExp(value[1]);
         break;
       case 'month':
-        self = this;
         var months = value[1].split('-').map(function (v) {
-          return self.monthName(v);
-        });
-        out = 'at every minute of every month ' + this.rangeify(months.join('-'));
+          return this.monthName(v);
+        }, this);
+        out = 'at every minute of every month ' + this.rangeifyExp(months.join('-'));
         break;
       case 'weekday':
-        self = this;
         var weekdays = value[1].split('-').map(function (v) {
-          return self.dayName(v);
-        });
-        out = 'at every minute of every day ' + this.rangeify(weekdays.join('-'));
+          return this.dayName(v);
+        }, this);
+        out = 'at every minute of every day ' + this.rangeifyExp(weekdays.join('-'));
         break;
       default:
         break;
@@ -126,40 +123,25 @@ module.exports = {
 
     switch (value[0]) {
       case 'minute':
-        out = 'at every ' + this.stepify(value[1]) + ' minute';
+        out = 'at every ' + this.stepifyExp(value[1]) + ' minute';
         break;
       case 'hour':
-        out = 'at every minute past every ' + this.stepify(value[1]) + ' hour';
+        out = 'at every minute past every ' + this.stepifyExp(value[1]) + ' hour';
         break;
       case 'day':
-        out = 'at every minute on every ' + this.stepify(value[1]) + ' day of the month';
+        out = 'at every minute on every ' + this.stepifyExp(value[1]) + ' day of the month';
         break;
       case 'month':
-        out = 'at every minute in every ' + this.stepify(value[1]) + ' month';
+        out = 'at every minute in every ' + this.stepifyExp(value[1]) + ' month';
         break;
       case 'weekday':
-        out = 'at every minute on every ' + this.stepify(value[1]) + ' day of the week';
+        out = 'at every minute on every ' + this.stepifyExp(value[1]) + ' day of the week';
         break;
       default:
         break;
     }
 
     return out;
-  },
-  hasMinutes: function (combination) {
-    return combination.hasOwnProperty('minute') && !combination.hasOwnProperty('hour');
-  },
-  hasHours: function (combination) {
-    return !combination.hasOwnProperty('minute') && combination.hasOwnProperty('hour');
-  },
-  hasMinutesAndHours: function (combination) {
-    return combination.hasOwnProperty('minute') && combination.hasOwnProperty('hour');
-  },
-  hasTime: function (combination) {
-    if (combination.hasOwnProperty('minute') && combination.hasOwnProperty('hour')) {
-      return (combination.minute.match(/^[0-9]{1,2}$/) && combination.hour.match(/^[0-9]{1,2}$/));
-    }
-    return false;
   },
   humanizeTime: function (combination) {
     var string = '';
@@ -191,6 +173,54 @@ module.exports = {
       string = 'at every minute';
     }
     return string;
+  },
+  hasMinutes: function (combination) {
+    return combination.hasOwnProperty('minute') && !combination.hasOwnProperty('hour');
+  },
+  hasHours: function (combination) {
+    return !combination.hasOwnProperty('minute') && combination.hasOwnProperty('hour');
+  },
+  hasMinutesAndHours: function (combination) {
+    return combination.hasOwnProperty('minute') && combination.hasOwnProperty('hour');
+  },
+  hasTime: function (combination) {
+    if (combination.hasOwnProperty('minute') && combination.hasOwnProperty('hour')) {
+      return (combination.minute.match(/^[0-9]{1,2}$/) && combination.hour.match(/^[0-9]{1,2}$/));
+    }
+    return false;
+  },
+  ordinalify: function (value) {
+    var j = value % 10, k = value % 100;
+    if (j == 1 && k != 11) {
+      return value + "st";
+    }
+    if (j == 2 && k != 12) {
+      return value + "nd";
+    }
+    if (j == 3 && k != 13) {
+      return value + "rd";
+    }
+    return value + "th";
+  },
+  monthName: function (value) {
+    var monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var months = value.split(',');
+    var names = [];
+    months.forEach(function (m) {
+      names.push(monthNames[m]);
+    });
+
+    return names.join(', ');
+  },
+  dayName: function (value) {
+    var dayNames = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    var days = value.split(',');
+    var names = [];
+    days.forEach(function (m) {
+      names.push(dayNames[m]);
+    });
+
+    return names.join(', ');
   },
   hasDayOfTheMonth: function (combination) {
     return combination.hasOwnProperty('day');
@@ -258,11 +288,11 @@ module.exports = {
     if (op) {
       switch (op[0]) {
         case ',':
-          return this.listify(o);
+          return this.listifyExp(o);
         case '-':
-          return this.rangeify(o);
+          return this.rangeifyExp(o);
         case '/':
-          return this.stepify(o);
+          return this.stepifyExp(o);
         default:
           return '';
       }
@@ -275,47 +305,14 @@ module.exports = {
   getValue: function (value) {
     return (value == '*' || value.match(/^\*\/1$/)) ? null : value;
   },
-  monthName: function (value) {
-    var monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    var months = value.split(',');
-    var names = [];
-    months.forEach(function (m) {
-      names.push(monthNames[m]);
-    });
-
-    return names.join(', ');
-  },
-  dayName: function (value) {
-    var dayNames = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-    var days = value.split(',');
-    var names = [];
-    days.forEach(function (m) {
-      names.push(dayNames[m]);
-    });
-
-    return names.join(', ');
-  },
-  listify: function (value) {
+  listifyExp: function (value) {
     return value.replace(/,(?=[^,]+$)/, ' and ');
   },
-  rangeify: function (value) {
+  rangeifyExp: function (value) {
     return value.replace(/([\w]+)-([\w]+)/, 'from $1 to $2')
   },
-  stepify: function (value) {
+  stepifyExp: function (value) {
     var humanizeStep = value.replace(/\*\/([\d+])/, '$1');
     return this.ordinalify(humanizeStep);
-  },
-  ordinalify: function (value) {
-    var j = value % 10, k = value % 100;
-    if (j == 1 && k != 11) {
-      return value + "st";
-    }
-    if (j == 2 && k != 12) {
-      return value + "nd";
-    }
-    if (j == 3 && k != 13) {
-      return value + "rd";
-    }
-    return value + "th";
   }
 };
