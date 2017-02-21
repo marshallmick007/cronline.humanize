@@ -1,13 +1,13 @@
 module.exports = {
 
-  humanize: function(cronline){
-    if(cronline == '* * * * *' || cronline == '*/1 * * * *'){
+  humanize: function (cronline) {
+    if (cronline == '* * * * *' || cronline == '*/1 * * * *') {
       return 'at every minute';
     }
-    else{
+    else {
       var fields = cronline.split(/\s/);
 
-      if(fields.length != 5){
+      if (fields.length != 5) {
         return 'not a valid cron expression';
       } else {
         var parsed_field = [];
@@ -18,24 +18,22 @@ module.exports = {
         parsed_field.push(['month', this.getValue(fields[3])]);
         parsed_field.push(['weekday', this.getValue(fields[4])]);
 
-        var defined_fields = parsed_field.filter(function(e, i){
+        var defined_fields = parsed_field.filter(function (e, i) {
           return e[1] !== null;
         });
 
-        if(defined_fields.length == 1)
-        {
+        if (defined_fields.length == 1) {
           return this.single(defined_fields[0]);
         }
-        else
-        {
+        else {
           return this.combination(defined_fields);
         }
       }
     }
   },
-  simple_exp: function(value){
+  humanizeExp: function (value) {
     var out = '';
-    switch(value[0]){
+    switch (value[0]) {
       case 'minute':
         out = 'at minute ' + value[1];
         break;
@@ -57,10 +55,10 @@ module.exports = {
 
     return out;
   },
-  list: function(value){
+  humanizeList: function (value) {
     var out = '';
 
-    switch(value[0]){
+    switch (value[0]) {
       case 'minute':
         out = 'at minute ' + this.listify(value[1]);
         break;
@@ -72,14 +70,14 @@ module.exports = {
         break;
       case 'month':
         self = this;
-        var months = value[1].split(',').map(function(v){
+        var months = value[1].split(',').map(function (v) {
           return self.monthName(v);
         });
         out = 'at every minute in ' + this.listify(months.join(','));
         break;
       case 'weekday':
         self = this;
-        var weekdays = value[1].split(',').map(function(v){
+        var weekdays = value[1].split(',').map(function (v) {
           return self.dayName(v);
         });
         out = 'at every minute on ' + this.listify(weekdays.join(','));
@@ -90,10 +88,10 @@ module.exports = {
 
     return out;
   },
-  range: function(value){
+  humanizeRange: function (value) {
     var out = '';
 
-    switch(value[0]){
+    switch (value[0]) {
       case 'minute':
         out = 'at every minute ' + this.rangeify(value[1]);
         break;
@@ -105,14 +103,14 @@ module.exports = {
         break;
       case 'month':
         self = this;
-        var months = value[1].split('-').map(function(v){
+        var months = value[1].split('-').map(function (v) {
           return self.monthName(v);
         });
         out = 'at every minute of every month ' + this.rangeify(months.join('-'));
         break;
       case 'weekday':
         self = this;
-        var weekdays = value[1].split('-').map(function(v){
+        var weekdays = value[1].split('-').map(function (v) {
           return self.dayName(v);
         });
         out = 'at every minute of every day ' + this.rangeify(weekdays.join('-'));
@@ -123,10 +121,10 @@ module.exports = {
 
     return out;
   },
-  step: function(value){
+  humanizeStep: function (value) {
     var out = '';
 
-    switch(value[0]){
+    switch (value[0]) {
       case 'minute':
         out = 'at every ' + this.stepify(value[1]) + ' minute';
         break;
@@ -158,19 +156,10 @@ module.exports = {
     return combination.hasOwnProperty('minute') && combination.hasOwnProperty('hour');
   },
   hasTime: function (combination) {
-    if(combination.hasOwnProperty('minute') && combination.hasOwnProperty('hour')) {
+    if (combination.hasOwnProperty('minute') && combination.hasOwnProperty('hour')) {
       return (combination.minute.match(/^[0-9]{1,2}$/) && combination.hour.match(/^[0-9]{1,2}$/));
     }
     return false;
-  },
-  hasDayOfTheMonth: function (combination) {
-    return combination.hasOwnProperty('day');
-  },
-  hasWeekday: function(combination) {
-    return combination.hasOwnProperty('weekday');
-  },
-  hasMonth: function(combination){
-    return combination.hasOwnProperty('month');
   },
   humanizeTime: function (combination) {
     var string = '';
@@ -185,152 +174,138 @@ module.exports = {
       string = 'at every minute past hour ' + combination.hour;
     }
     else if (this.hasMinutesAndHours(combination)) {
-      if(combination.minute.match('/'))
-      {
+      if (combination.minute.match('/')) {
         string = 'at every ' + this.parseExp(combination.minute) + ' minute';
       }
-      else
-      {
+      else {
         string = 'at minute ' + this.parseExp(combination.minute);
       }
-      if (combination.hour.match('/'))
-      {
+      if (combination.hour.match('/')) {
         string += ' on every ' + this.parseExp(combination.hour) + ' hour';
       }
-      else
-      {
+      else {
         string += ' past hour ' + this.parseExp(combination.hour);
       }
     }
-    else
-    {
+    else {
       string = 'at every minute';
     }
     return string;
   },
-  single: function(o){
-    if(o[1].match(','))
-    {
-      return this.list(o);
+  hasDayOfTheMonth: function (combination) {
+    return combination.hasOwnProperty('day');
+  },
+  hasWeekday: function (combination) {
+    return combination.hasOwnProperty('weekday');
+  },
+  hasMonth: function (combination) {
+    return combination.hasOwnProperty('month');
+  },
+  single: function (o) {
+    if (o[1].match(',')) {
+      return this.humanizeList(o);
     }
-    else if(o[1].match('-'))
-    {
-      return this.range(o);
+    else if (o[1].match('-')) {
+      return this.humanizeRange(o);
     }
-    else if(o[1].match('/'))
-    {
-      return this.step(o);
+    else if (o[1].match('/')) {
+      return this.humanizeStep(o);
     }
-    else
-    {
-      return this.simple_exp(o);
+    else {
+      return this.humanizeExp(o);
     }
   },
-  combination: function(defined_fields){
+  combination: function (defined_fields) {
+    var out = [];
+    var prefix = '';
+
     var combination = {};
-    for(var i = 0; i < defined_fields.length; i++){
+    for (var i = 0; i < defined_fields.length; i++) {
       o = defined_fields[i];
       combination[o[0]] = o[1];
     }
-    var out = [];
+
     out.push(this.humanizeTime(combination));
 
-    if (this.hasDayOfTheMonth(combination)){
+    if (this.hasDayOfTheMonth(combination)) {
       out.push('on day of the month ' + this.parseExp(combination.day));
-      if(this.hasWeekday(combination)) {
+      if (this.hasWeekday(combination)) {
         out.push('and on ' + this.dayName(combination.weekday));
       }
     }
-    else if(this.hasWeekday(combination)){
-      self = this;
-      var weekdays = combination.weekday.split('-').map(function(v){
-        return self.dayName(v);
-      });
+    else if (this.hasWeekday(combination)) {
+      var weekdays = combination.weekday.split('-').map(function (v) {
+        return this.dayName(v);
+      }, this);
 
-      if(weekdays.length == 1)
-      {
-        var prefix = 'on ';
-      }
-      else
-      {
-        var prefix = 'on every day ';
-      }
+      prefix = (weekdays.length == 1) ? 'on ' : 'on every day ';
       out.push(prefix + this.parseExp(weekdays.join('-')));
     }
-    if(this.hasMonth(combination)){
-      self = this;
-      var months = combination.month.split('-').map(function(v){
-        return self.monthName(v);
-      });
+    if (this.hasMonth(combination)) {
+      var months = combination.month.split('-').map(function (v) {
+        return this.monthName(v);
+      }, this);
 
-      if(months.length == 1)
-      {
-        var prefix = 'in ';
-      }
-      else
-      {
-        var prefix = 'in every month ';
-      }
+      prefix = (months.length == 1) ? 'in ' : 'in every month ';
       out.push(prefix + this.parseExp(months.join('-')));
     }
 
     return out.join(' ');
   },
-  parseExp: function(o){
-    if(o.match(','))
-    {
-      return this.listify(o);
+  parseExp: function (o) {
+    var op = o.match(',|-|/');
+
+    if (op) {
+      switch (op[0]) {
+        case ',':
+          return this.listify(o);
+        case '-':
+          return this.rangeify(o);
+        case '/':
+          return this.stepify(o);
+        default:
+          return '';
+      }
     }
-    else if(o.match('-'))
-    {
-      return this.rangeify(o);
-    }
-    else if(o.match('/'))
-    {
-      return this.stepify(o);
-    }
-    else
-    {
-      return o;
-    }
+    return o;
   },
-  parseTime: function(combination){
+  parseTime: function (combination) {
     return combination.hour + ':' + "00".substring(0, 2 - combination.minute.length) + combination.minute;
   },
-  getValue: function(value){
-    return (value == '*' || value.match(/^\*\/1$/)) ? null: value;
+  getValue: function (value) {
+    return (value == '*' || value.match(/^\*\/1$/)) ? null : value;
   },
-  monthName: function(value){
+  monthName: function (value) {
     var monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var months = value.split(',');
     var names = [];
-    months.forEach(function(m) {
+    months.forEach(function (m) {
       names.push(monthNames[m]);
     });
 
     return names.join(', ');
   },
-  dayName: function(value){
+  dayName: function (value) {
     var dayNames = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     var days = value.split(',');
     var names = [];
-    days.forEach(function(m) {
+    days.forEach(function (m) {
       names.push(dayNames[m]);
     });
 
     return names.join(', ');
   },
-  listify: function(value) {
+  listify: function (value) {
     return value.replace(/,(?=[^,]+$)/, ' and ');
   },
-  rangeify: function(value){
+  rangeify: function (value) {
     return value.replace(/([\w]+)-([\w]+)/, 'from $1 to $2')
   },
-  stepify: function(value){
-    var step = value.replace(/\*\/([\d+])/, '$1');
-    return this.ordinalify(step);
+  stepify: function (value) {
+    var humanizeStep = value.replace(/\*\/([\d+])/, '$1');
+    return this.ordinalify(humanizeStep);
   },
-  ordinalify: function(value){
+  ordinalify: function (value) {
     var j = value % 10, k = value % 100;
     if (j == 1 && k != 11) {
       return value + "st";
