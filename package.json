@@ -1,7 +1,8 @@
 {
-  "name": "cronline",
-  "version": "0.0.0",
-  "description": "",
+  "name": "cronline.humanize",
+  "description": "Translates a Cron expression to english",
+  "readme": "Translates a Cron expression to english. Thats it.",
+  "version": "0.0.1",
   "main": "cronline.js",
   "directories": {
     "test": "tests"
@@ -19,6 +20,6 @@
     "cron",
     "parser"
   ],
-  "author": "Jean-François Rioux",
-  "license": "BSD"
+  "author": "Jean-François Rioux <jfiroux@mantor.org>",
+  "license": "MIT"
 }
