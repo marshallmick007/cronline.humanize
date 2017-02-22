@@ -5,7 +5,7 @@ module.exports = {
       return 'at every minute';
     }
     else {
-      var fields = cronline.split(/\s/);
+      var fields = cronline.trim().split(/\s/);
 
       if (fields.length != 5) {
         return 'not a valid cron expression';

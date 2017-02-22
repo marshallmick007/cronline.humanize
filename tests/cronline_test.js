@@ -2,8 +2,11 @@ var expect = require('chai').expect;
 var Cronline = require('../cronline');
 
 describe('single expression', function(){
-  it("should return an error on ivalid cron expression", function(){
+  it("should return an error on invalid cron expression", function(){
     var result = Cronline.humanize("Failure, when your best isn't just good enough");
+    expect(result).to.equal('not a valid cron expression');
+
+    result = Cronline.humanize("* * * * ");
     expect(result).to.equal('not a valid cron expression');
   });
 
