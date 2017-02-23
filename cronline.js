@@ -259,17 +259,19 @@ module.exports = {
 
     if (this.hasDayOfTheMonth(combination)) {
       out.push('on day of the month ' + this.parseExp(combination.day));
-      if (this.hasWeekday(combination)) {
-        out.push('and on ' + this.dayName(combination.weekday));
-      }
     }
-    else if (this.hasWeekday(combination)) {
-      var weekdays = combination.weekday.split('-').map(function (v) {
+    if (this.hasWeekday(combination)) {
+      var op = combination.weekday.match(',|-|/');
+      var weekdays = combination.weekday.split(op).map(function (v) {
         return this.dayName(v);
       }, this);
 
-      prefix = (weekdays.length == 1) ? 'on ' : 'on every day ';
-      out.push(prefix + this.parseExp(weekdays.join('-')));
+      prefix = (weekdays.length == 1 || op == ',') ? 'on ' : 'on every day ';
+
+      if (this.hasDayOfTheMonth(combination)){
+        prefix = 'and ' + prefix;
+      }
+      out.push(prefix + this.parseExp(weekdays.join(op)));
     }
     if (this.hasMonth(combination)) {
       var months = combination.month.split('-').map(function (v) {

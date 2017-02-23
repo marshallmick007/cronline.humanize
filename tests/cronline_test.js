@@ -232,14 +232,24 @@ describe('combinations', function() {
       expect(result).to.equal('at 9:30 on every day from Monday to Wednesday')
     });
 
-    it("should step of minutes and list of hours anything", function(){
+    it("should parse step of minutes and list of hours and day of the month and month", function(){
       var result = Cronline.humanize('*/5 0,12 1 2 *');
       expect(result).to.equal('at every 5th minute past hour 0 and 12 on day of the month 1 in February');
     });
 
+    it("should parse time and day of the month and weekday and range of months ", function(){
+      var result = Cronline.humanize('0 5 4 1-4 1');
+      expect(result).to.equal('at 5:00 on day of the month 4 and on Monday in every month from January to April')
+    });
+
+    it("should parse time and day of the month and weekday and range of months ", function(){
+      var result = Cronline.humanize('0 5 12 11 1-3');
+      expect(result).to.equal('at 5:00 on day of the month 12 and on every day from Monday to Wednesday in November')
+    });
+
     it("should parse anything", function(){
       var result = Cronline.humanize('*/11 */4 1,4 2-6 1,3,5');
-      expect(result).to.equal('at every 11th minute on every 4th hour on day of the month 1 and 4 and on Monday, Wednesday, Friday in every month from February to June');
+      expect(result).to.equal('at every 11th minute on every 4th hour on day of the month 1 and 4 and on Monday,Wednesday and Friday in every month from February to June');
     });
   });
 });
